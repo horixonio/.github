@@ -1,0 +1,53 @@
+name: Go CI Workflow
+
+on:
+  workflow_call:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 1.21  # Change as needed
+
+      - name: Cache Go modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Verify and Tidy Modules
+        run: |
+          go mod tidy
+          go mod verify
+
+      - name: Run Linter (golangci-lint)
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+          args: --timeout=5m
+
+      - name: Run Tests with Verbose Output
+        run: go test -v ./...
+
+      - name: Run Coverage Tests
+        run: go test -cover ./...
+
+      - name: Check Formatting
+        run: |
+          UNFORMATTED_FILES=$(gofmt -l .)
+          if [[ -n "$UNFORMATTED_FILES" ]]; then
+            echo "The following files are not formatted properly:"
+            echo "$UNFORMATTED_FILES"
+            exit 1
+          fi
