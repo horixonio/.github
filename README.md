@@ -1,1 +1,1 @@
-# .github
+This repository contains default `.github` files to all `horixonio` repositories.
