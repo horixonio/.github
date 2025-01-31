@@ -1,0 +1,16 @@
+name: Slack Notification
+on:
+  workflow_run:
+    workflows: ["Run Tests", "Build Go Application"]
+    types:
+      - completed
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Slack Notification
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_MESSAGE: "Workflow ${{ github.workflow }} completed with status ${{ job.status }}"

@@ -1,0 +1,20 @@
+name: Deploy to Kubernetes
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set Up kubectl
+        run: |
+          echo "${{ secrets.KUBECONFIG }}" > kubeconfig
+          export KUBECONFIG=kubeconfig
+          kubectl config use-context my-cluster
+
+      - name: Deploy to Kubernetes
+        run: kubectl apply -f k8s/deployment.yaml
